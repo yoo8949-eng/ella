@@ -7,7 +7,7 @@ This repo stores the scripts, photos, thumbnails, and YouTube text for each vide
 - **Face on the LEFT, name on the RIGHT.** The portrait fills the left side and fades into a dark background toward the centre. The name is right-aligned on the right side.
 - Use a real photo of the person, in sepia.
 - First name in white, last name in yellow, in a heavy condensed font (Anton) with a black outline and drop shadow. A short tagline (2 lines, e.g. "BLIND. DEAF." / "UNSTOPPABLE.") goes under the name, also right-aligned.
-- If the person faces sideways, pick or flip the photo so they look toward the name.
+- The face must look forward (toward the camera), not in profile. If the head is turned slightly, flip the photo so it turns toward the name.
 
 ## Video conventions
 - Language: English. Voice: ElevenLabs "Bill".
