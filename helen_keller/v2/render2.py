@@ -38,7 +38,7 @@ PAINTS = {
     'P76': ['pt01'],
 }
 CALM = {'P08', 'P17', 'P54', 'P57', 'P58', 'P59', 'P60', 'P65', 'P66', 'P67', 'P71', 'P73'}
-STAMPS = {'P09': 'BLIND AND DEAF', 'P42': 'CUM LAUDE', 'P72': 'MEDAL OF FREEDOM'}
+STAMPS = {'P09': ('BLIND AND DEAF', 'completely deaf'), 'P42': ('CUM LAUDE', 'with honors'), 'P72': ('MEDAL OF FREEDOM', 'Medal of Freedom')}
 PEOPLE = [  # (filename substring, name, dates) — name bar on the first appearance
     ('helen-c1888-profile', 'Helen Keller', '1880 – 1968'), ('arthur-h-keller', 'Captain Arthur Keller', '1836 – 1896'),
     ('kate-adams-keller', 'Kate Adams Keller', '1856 – 1921'), ('alexander-graham-bell', 'Alexander Graham Bell', '1847 – 1922'),
@@ -377,9 +377,12 @@ def plan2():
             if texts and (v.startswith('pt') or k == 0):
                 txt = texts.pop(0)
                 cut['quote' if txt.startswith('“') else 'where'] = txt
-            if k == 0 and pid in STAMPS:
-                cut['stamp'] = STAMPS[pid]
             cuts.append(cut)
+        if pid in STAMPS:  # stamp lands on the cut that is showing when the keyword is spoken
+            txt, word = STAMPS[pid]
+            ts = next(a + 0.4 for a, b, s_ in subs if ev['start'] <= a < ev['end'] and word in s_.replace('\n', ' '))
+            c = next(c for c in cuts if c.get('pid') == pid and c['t0'] <= ts < c['t1'])
+            c['stamp'], c['stamp_at'] = txt, ts - c['t0']
     for i, c in enumerate(cuts):
         c['i'] = i
         if not c['calm'] and 'card' not in c:
@@ -387,7 +390,7 @@ def plan2():
                 sfx.append((c['t0'], 'whoosh'))
             sfx.append((c['t0'] + 0.32, 'pop'))
         if c.get('stamp'):
-            sfx.append((c['t0'] + 0.9 + 0.2, 'thud'))
+            sfx.append((c['t0'] + c['stamp_at'] + 0.2, 'thud'))
         if c.get('lower3'):
             sfx.append((c['t0'] + 0.5, 'ding'))
     json.dump({'duration': p['duration'], 'cuts': cuts, 'sfx': sorted(sfx)}, open(os.path.join(WORK, 'plan2.json'), 'w'), indent=1)
@@ -441,7 +444,7 @@ def draw_cut(c, t):
     if c.get('quote'):
         quote_over(C, u, c['quote'], 0.5, c['t1'] - c['t0'] - 0.6)
     if c.get('stamp'):
-        stamp(C, u, c['stamp'], 0.9)
+        stamp(C, u, c['stamp'], c['stamp_at'])
     return C
 
 
@@ -477,7 +480,7 @@ def frame(cuts, sfx, subs, i, t):
     if not c['calm']:
         C = pops(C, t, [s for s in sfx if abs(s[0] - t) < 1.0])
     if c.get('stamp'):
-        C = jolt(C, t, c['t0'] + 0.9 + 0.22)
+        C = jolt(C, t, c['t0'] + c['stamp_at'] + 0.22)
     # edge fades around cards
     if 'card' in c:
         C *= min(1, lin(t, c['t0'], c['t0'] + 0.4) if c['card'] != 'open' else lin(t, 0, 0.8))
