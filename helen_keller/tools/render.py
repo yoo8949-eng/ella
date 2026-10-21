@@ -489,11 +489,22 @@ def count():
 
 def mux(out):
     p = json.load(open(os.path.join(WORK, 'plan.json')))
-    n = len(segments(build_shots(p['timeline'])))
+    segs = segments(build_shots(p['timeline']))
     lst = os.path.join(WORK, 'seg', 'list.txt')
+    prev = None
     with open(lst, 'w') as f:
-        for i in range(n):
+        for i, s in enumerate(segs):
+            n0 = round(s[0]['start'] * FPS)
+            if prev is not None and n0 > prev:
+                # the silent pause before a chapter card has no shot: fill it with black
+                gap = os.path.join(WORK, 'seg', f'gap{n0 - prev}.mp4')
+                if not os.path.exists(gap):
+                    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', f'color=black:s={W}x{H}:r={FPS}',
+                                    '-frames:v', str(n0 - prev), '-c:v', 'libx264', '-preset', 'fast', '-crf', '19',
+                                    '-pix_fmt', 'yuv420p', gap], check=True)
+                f.write(f"file '{os.path.basename(gap)}'\n")
             f.write(f"file 'seg{i:03d}.mp4'\n")
+            prev = round(s[-1]['end'] * FPS)
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', lst,
                     '-i', os.path.join(WORK, 'narration.wav'), '-map', '0:v', '-map', '1:a',
                     '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2',
