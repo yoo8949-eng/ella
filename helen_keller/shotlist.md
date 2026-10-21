@@ -414,3 +414,20 @@ Marks: **[R]** = 2010 stage reenactment at Ivy Green (actors, not Helen); **[C]*
 
 
 _Totals: 107 unique images, 188 shots including 26 title cards, 76 paragraphs._
+
+## Optional upgrades (Wikimedia Commons, not downloaded)
+
+Commons blocked this container (HTTP 429, robot policy), so these public-domain files were not fetched. Each would replace a title card or a stand-in:
+
+- P36/P38: *Laurence Hutton, Mark Twain and Helen Keller.jpg* (PD-US)
+- P37: *Henry Huttleston Rogers.jpg* (PD-US-expired)
+- P04/P72: *Eisenhower with Helen Keller.jpg* (1953), *President John F. Kennedy Meets with Helen Keller.jpg* (1961) - US Government works
+- P53: *Deliverance poster (1919).jpg*, *Deliverance (1919) - Keller.jpg* (PD-US-expired)
+- P54: *Perkins School for the Blind Bound Clippings- World War Blind, 1916* (Flickr Commons, no known restrictions)
+- P57: *Thousands of books smoulder ... NARA 535791.tif* (US NARA)
+- P63: *Faithful Dog Hachiko Photo.png*, *Helen Keller with her Akita Kenzan-Go.jpg* (PD-Japan-oldphoto)
+- P67/P68/P71: *Helen Keller visit to Japan in 1948 01.jpg*, *...in 1955 01.jpg* (PD-Japan-oldphoto); *Keller, Thomson, Bonnevie-Svendsen.jpg* (1950, PD-US-not-renewed, shows Polly Thomson); *Mary Ingraham Bunting-Smith and Helen Keller, 1960* (Flickr Commons)
+- P69/P70: *Anne Bancroft Patty Duke Miracle Worker 1/2 1960.jpg* (PD no notice), *The Miracle Worker (1962) trailer 1.jpg* (PD no notice), *Helen keller patty duke.jpg* (PD-AR-Photo)
+- P72: *President Lyndon B. Johnson Awards the Medal of Freedom to A. Philip Randolph - DPLA ...jpg* (same 14 Sep 1964 ceremony; US Government)
+- P74: *2003 AL Proof.png* (US Mint), *U.S. Capitol Helen Keller Statue.jpg* (check licence)
+- P17/P31: *Tewksbury.Female Asylum ... 1896.jpg*, *Tewksbury Investigation.png*, *1893 Horace Mann School for the Deaf, Miss Fuller and Her Class* (BPL)
