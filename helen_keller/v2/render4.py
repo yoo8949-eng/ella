@@ -380,7 +380,7 @@ def sub_dark(text):
     """Subtitle: white text on a black box."""
     if text not in _SUB:
         from PIL import Image, ImageDraw, ImageFont
-        f = ImageFont.truetype(F_MID, 46)
+        f = ImageFont.truetype(F_MID, 52)
         lines = text.split('\n')
         d0 = ImageDraw.Draw(Image.new('RGBA', (8, 8)))
         rb = d0.textbbox((0, 0), 'Hg', font=f)
