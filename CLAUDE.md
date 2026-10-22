@@ -1,6 +1,12 @@
 # ella: YouTube history documentaries
 
-This repo stores the scripts, photos, thumbnails, and YouTube text for each video, one folder per subject (e.g. `helen_keller/`). Narration and video rendering are done on the user's PC (the long-form kit in `롱폼생성기\projects\`), which holds the ElevenLabs key.
+This repo stores the scripts, photos, thumbnails, YouTube text and render tools for each video, one folder per subject (e.g. `helen_keller/`).
+
+**Videos are made in the cloud, not on the user's PC** (the user finds the PC setup too hard). Everything runs in a cloud session on this repo:
+- Keys come from the cloud environment's variables: `ELEVENLABS_API_KEY` (narration; if it starts with `Sk_`, lowercase the first letter) and `FAL_KEY` (gpt-image-2 paintings, ElevenLabs music via `fal-ai/elevenlabs/music`). If a key is missing, ask the user to add it under the environment's Environment variables (gear icon next to "Default").
+- Reference pipeline: `helen_keller/tools/tts.py` (narration with timestamps), `helen_keller/v2/render4.py` (JFK-style cut: archival film + paintings + photo cards, words popping in as they are spoken, three music beds, film grain, burned-in subtitles).
+- Wikimedia Commons is blocked from the cloud (HTTP 429): ask the user to download Commons files and attach them as files (a .zip works); pasted images can't be saved.
+- Deliver files with SendUserFile (400 MB limit: two-pass encode to ~1.55 Mb/s for a 30-min video). GitHub releases are blocked; for big files, a branch with <100 MB parts works.
 
 ## Thumbnail rules (always, no need to ask)
 - 1280x720 JPG, named `<Name>_thumbnail.jpg`.
@@ -13,5 +19,7 @@ This repo stores the scripts, photos, thumbnails, and YouTube text for each vide
 - Language: English. Voice: ElevenLabs "Bill".
 - Pictures: real historical photos (public domain / no known restrictions, e.g. Library of Congress). The person's face appears only in real photos, never in AI images.
 - Before any paid step (TTS, image generation), show the estimated cost and get the user's approval.
-- Deliverables go to a Desktop folder "<이름> 영상": `<Name>_English.mp4`, `<Name>_English.srt`, `<Name>_thumbnail.jpg`, `<Name>_YouTube.txt`.
-- `<Name>_YouTube.txt` sections: TITLE, DESCRIPTION, [Time Line] (chapter timestamps from the final narration audio), TAGS.
+- Style (the user's series, "like the JFK video", reference channel The People Profiles): continuous picture with long crossfades, no cuts to black; key words pop in on screen as Bill says them; real archival film wherever public-domain footage exists; background music under the narration (about -19 dB relative to speech); no sound effects on zooms.
+- Subtitles burned in: white text on a black box, 52 px; also deliver the .srt.
+- Deliverables: `<Name>_English.mp4`, `<Name>_English.srt`, `<Name>_thumbnail.jpg`, `<Name>_YouTube.txt`.
+- `<Name>_YouTube.txt` sections: TITLE, DESCRIPTION (with sources and an AI-image disclosure if paintings are used), [Time Line] (chapter timestamps from the final narration audio), TAGS, PINNED COMMENT.
