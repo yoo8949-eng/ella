@@ -116,6 +116,12 @@ def plan4():
                 continue
             mine = [c for c in cuts if c.get('pid') == pid and 'stack' not in c and not c.get('card') and not c.get('extra')]
             spot = next((c for c in mine if c['v'].startswith('pt') and not c.get('clip')), None)
+            if spot is None:  # a context photo, then a film clip that does not show Helen
+                spot = next((c for c in mine if not c.get('clip') and 'helen' not in c['v']), None)
+            if spot is None:
+                spot = next((c for c in mine if c.get('clip') and 'helen' not in c['clip'] and 'talk1930' not in c['clip']), None)
+            if spot is None and 'helen' in f:  # a photo of Helen may take the place of another photo of her
+                spot = next((c for c in mine if not c.get('clip')), None)
             if spot is None:
                 longest = max(mine, key=lambda c: c['t1'] - c['t0'], default=None)
                 starts = [a_ for a_, b_, _ in subs if longest and longest['t0'] + 2.5 < a_ < longest['t1'] - 2.5]
