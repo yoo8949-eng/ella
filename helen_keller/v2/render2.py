@@ -184,7 +184,7 @@ def put(C, spr, x, y, scale=1.0, alpha=1.0, anchor=(0.5, 0.5)):
 
 
 def photo_card(name, maxh=740, maxw=1500):
-    key = ('card', name)
+    key = ('card', name, maxh, maxw)
     if key not in _SPR:
         im = load_rgb(src_path(name))
         h, w = im.shape[:2]
