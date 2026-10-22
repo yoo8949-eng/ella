@@ -69,6 +69,8 @@ def plan4():
         for c in order:
             if 'helen' in c['v'] and not c['v'].startswith('pt'):
                 continue  # keep real photos of Helen
+            if c.get('card') == 'open':
+                continue  # the film opens on the colour painting of the pump
             m = fit(c, cand())
             if m:
                 used.add(m['file']); c['clip'] = m['file']; c['clip_dur'] = m['duration']
