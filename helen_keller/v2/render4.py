@@ -54,21 +54,46 @@ def plan4():
     tl = json.load(open(os.path.join(WORK, 'plan.json')))['timeline']
     paras = {e['id']: e for e in tl if e['type'] == 'para'}
     cuts = p3['cuts']
-    # archival film: replace painting cuts of the paragraphs a clip fits (each clip used once, longest first)
-    clips = sorted(load_clips(), key=lambda m: -m['duration'])
+    # archival film: per paragraph, replace painting cuts, then context photos, then split long cuts, until its clips are used
+    clips = load_clips()
+    subs = load_srt()
     used = set()
-    for c in cuts:
-        if 'stack' in c or c.get('card') or not c['v'].startswith('pt'):
-            continue
+    def fit(c, cand):
         need = c['t1'] - c['t0']
-        cand = [m for m in clips if m['file'] not in used and c['pid'] in m.get('paragraphs', [])]
-        if not cand:
-            continue
-        m = min(cand, key=lambda m: abs(m['duration'] - need) if m['duration'] >= need * 0.6 else 1e9)
-        if m['duration'] < need * 0.6:
-            continue
-        used.add(m['file'])
-        c['clip'] = m['file']; c['clip_dur'] = m['duration']
+        ok = [m for m in cand if m['duration'] >= min(need * 0.6, 6.0)]
+        return min(ok, key=lambda m: (not m.get('has_helen'), abs(m['duration'] - need))) if ok else None
+    for pid in sorted({c.get('pid') for c in cuts if c.get('pid')}):
+        cand = lambda: [m for m in clips if m['file'] not in used and pid in m.get('paragraphs', [])]
+        mine = lambda: [c for c in cuts if c.get('pid') == pid and 'stack' not in c and not c.get('clip')]
+        order = sorted(mine(), key=lambda c: (not c['v'].startswith('pt'), 'helen' in c['v']))
+        for c in order:
+            if 'helen' in c['v'] and not c['v'].startswith('pt'):
+                continue  # keep real photos of Helen
+            m = fit(c, cand())
+            if m:
+                used.add(m['file']); c['clip'] = m['file']; c['clip_dur'] = m['duration']
+        while cand():
+            longest = max(mine() + [c for c in cuts if c.get('pid') == pid and c.get('clip')], key=lambda c: c['t1'] - c['t0'], default=None)
+            if not longest or longest['t1'] - longest['t0'] < 7.5:
+                break
+            mid = (longest['t0'] + longest.get('lead', 0) + longest['t1']) / 2
+            starts = [a_ for a_, b_, _ in subs if longest['t0'] + longest.get('lead', 0) + 2.5 < a_ < longest['t1'] - 2.5]
+            if not starts:
+                break
+            cutp = min(starts, key=lambda a_: abs(a_ - mid))
+            new_c = {'t0': cutp, 't1': longest['t1'], 'v': longest['v'], 'pid': pid, 'calm': longest.get('calm', False)}
+            if longest.get('end_at') is not None:
+                new_c['end_at'] = longest.pop('end_at')
+            longest['t1'] = cutp
+            m = fit(new_c, cand())
+            if not m:
+                longest['t1'] = new_c['t1']
+                if 'end_at' in new_c: longest['end_at'] = new_c['end_at']
+                break
+            used.add(m['file']); new_c['clip'] = m['file']; new_c['clip_dur'] = m['duration']
+            cuts.insert(cuts.index(longest) + 1, new_c)
+    for i, c in enumerate(cuts):
+        c['i'] = i
     # every para-level cut that is not a photo also gets a free film clip if one is left for its chapter
     # words: absolute times
     words = []
@@ -144,14 +169,14 @@ def content_box(name, fr):
     return _BOX[name]
 
 
-def draw_clip(c, u, k):
+def draw_clip(c, u, k, words_on=False):
     fr = clip_frame(c['clip'], u, c['t1'] - c['t0'], c['clip_dur'])
     if fr is None:
         return np.zeros((H, W, 3), np.float32)
     x0, y0, x1, y1 = content_box(c['clip'], fr)
     content = fr[y0:y1, x0:x1]
     ch, cw = content.shape[:2]
-    if cw / ch > 1.6:  # already widescreen: fill with a slow push-in
+    if cw / ch > 1.6 and not words_on:  # already widescreen: fill with a slow push-in
         return kb(content, k, (0.5, 0.5, 1.0), (0.5, 0.5, 1.08))
     small = cv2.resize(content, (max(8, cw // 8), max(8, ch // 8)), interpolation=cv2.INTER_AREA)
     s = max(W / small.shape[1], H / small.shape[0])
@@ -160,10 +185,10 @@ def draw_clip(c, u, k):
     C = np.zeros((H, W, 3), np.float32)
     C[:bg.shape[0], :bg.shape[1]] = bg
     z = 1.0 + 0.06 * k
-    sc = H / ch * z
+    sc = H / ch * z * (min(0.82, 1180 / (cw * H / ch)) if words_on else 1.0)
     fw, fh = int(cw * sc), int(ch * sc)
     big = cv2.resize(content, (fw, fh), interpolation=cv2.INTER_LINEAR).astype(np.float32)
-    xa = (W - fw) // 2; ya = (H - fh) // 2
+    xa = (W - fw) // 2 if not words_on else int(CARD_X - fw / 2); ya = (H - fh) // 2
     sx0, sy0 = max(0, -xa), max(0, -ya)
     dx0, dy0 = max(0, xa), max(0, ya)
     w_, h_ = min(fw - sx0, W - dx0), min(fh - sy0, H - dy0)
@@ -239,7 +264,7 @@ def draw_cut(c, t, words_on):
     k = lin(u, 0, d)
     v = c['v']
     if c.get('clip'):
-        C = draw_clip(c, u, k)
+        C = draw_clip(c, u, k, words_on)
         vignette(C, 0.35)
     elif 'stack' in c:
         C = kb(blur_bg(v).clip(0, 255).astype(np.uint8), k, (0.5, 0.5, 1.0), (0.5, 0.5, 1.06))
