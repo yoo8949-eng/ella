@@ -35,6 +35,19 @@ MUSIC = {
 }
 GAIN_DB = {'main': -22, 'tension': -22, 'somber': -24}
 
+EXTRA_PHOTOS = {  # paragraph: [(photo, name bar or None)]
+    'P04': [('c00_eisenhower-with-helen-1953.jpg', ('Dwight D. Eisenhower', '1890 – 1969')),
+            ('c00_kennedy-meets-helen-1961.jpg', ('John F. Kennedy', '1917 – 1963'))],
+    'P38': [('c09_twain-hutton-helen-anne-1902.jpg', None)],
+    'P46': [('c11_helen-and-luther-burbank-1925.jpg', ('Luther Burbank', '1849 – 1926'))],
+    'P63': [('c16_helen-with-akita-kenzan-go.jpg', None)],
+    'P67': [('c17_japan-visit-1948.jpg', None), ('c17_tel-aviv-deaf-club-1952.jpg', None), ('c17_japan-visit-1955.jpg', None)],
+    'P71': [('c17_eleanor-roosevelt-and-helen-marthas-vineyard.jpg', ('Eleanor Roosevelt', '1884 – 1962'))],
+    'P69': [('c18_miracle-worker-broadway-1960-a.jpg', None)],
+    'P70': [('c18_miracle-worker-broadway-1960-b.jpg', None)],
+    'P74': [('c19_alabama-quarter-2003.jpg', None)],
+}
+
 
 # ------------------------------------------------------------------ plan
 def load_clips():
@@ -94,6 +107,31 @@ def plan4():
                 break
             used.add(m['file']); new_c['clip'] = m['file']; new_c['clip_dur'] = m['duration']
             cuts.insert(cuts.index(longest) + 1, new_c)
+    # photos the user supplied from Wikimedia Commons: take a painting cut, else split the paragraph's longest cut
+    for pid, files in EXTRA_PHOTOS.items():
+        for f, bar in files:
+            st = next((c for c in cuts if c.get('pid') == pid and 'stack' in c), None)
+            if st:
+                st['stack'][-1] = [f, st['stack'][-1][1]]
+                continue
+            mine = [c for c in cuts if c.get('pid') == pid and 'stack' not in c and not c.get('card') and not c.get('extra')]
+            spot = next((c for c in mine if c['v'].startswith('pt') and not c.get('clip')), None)
+            if spot is None:
+                longest = max(mine, key=lambda c: c['t1'] - c['t0'], default=None)
+                starts = [a_ for a_, b_, _ in subs if longest and longest['t0'] + 2.5 < a_ < longest['t1'] - 2.5]
+                if not starts:
+                    continue
+                mid = (longest['t0'] + longest['t1']) / 2
+                cutp = min(starts, key=lambda a_: abs(a_ - mid))
+                spot = {'t0': cutp, 't1': longest['t1'], 'pid': pid, 'calm': longest.get('calm', False)}
+                if longest.get('end_at') is not None:
+                    spot['end_at'] = longest.pop('end_at')
+                longest['t1'] = cutp
+                cuts.insert(cuts.index(longest) + 1, spot)
+            spot['v'] = f; spot['extra'] = True
+            spot.pop('clip', None); spot.pop('clip_dur', None)
+            if bar:
+                spot['lower3'] = bar
     for i, c in enumerate(cuts):
         c['i'] = i
     # every para-level cut that is not a photo also gets a free film clip if one is left for its chapter
