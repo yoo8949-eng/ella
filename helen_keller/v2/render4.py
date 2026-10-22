@@ -33,7 +33,7 @@ MUSIC = {
     'somber': "Instrumental only, absolutely no vocals. Very quiet somber elegy, sparse slow solo piano notes with a soft "
               "distant string drone, about 56 bpm, grieving and dignified, lots of space. No build-ups, no hits, seamless loop",
 }
-GAIN_DB = {'main': -22, 'tension': -22, 'somber': -24}
+GAIN_DB = {'main': -19, 'tension': -19, 'somber': -21}  # 3 dB louder than the JFK mix, at the user's request
 
 EXTRA_PHOTOS = {  # paragraph: [(photo, name bar or None)]
     'P04': [('c00_eisenhower-with-helen-1953.jpg', ('Dwight D. Eisenhower', '1890 – 1969')),
@@ -373,6 +373,29 @@ def draw_cut(c, t, words_on):
     return C
 
 
+_SUB = {}
+
+
+def sub_dark(text):
+    """Subtitle: white text on a black box."""
+    if text not in _SUB:
+        from PIL import Image, ImageDraw, ImageFont
+        f = ImageFont.truetype(F_MID, 46)
+        lines = text.split('\n')
+        d0 = ImageDraw.Draw(Image.new('RGBA', (8, 8)))
+        rb = d0.textbbox((0, 0), 'Hg', font=f)
+        lh = rb[3] - rb[1] + 14
+        tw = max(d0.textlength(l, font=f) for l in lines)
+        w_, h_ = int(tw) + 52, lh * len(lines) + 24
+        im = Image.new('RGBA', (w_, h_), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        d.rectangle((0, 0, w_ - 1, h_ - 1), fill=(0, 0, 0, 225))
+        for i, l in enumerate(lines):
+            d.text(((w_ - d.textlength(l, font=f)) / 2, 12 + i * lh - rb[1] + 4), l, font=f, fill=(255, 255, 255, 255))
+        _SUB[text] = np.asarray(im).astype(np.float32)
+    return _SUB[text]
+
+
 _GRAIN = None
 
 
@@ -404,7 +427,7 @@ def frame(cuts, words, subs, i, t, dur, n):
     C *= lin(t, 0, 1.0) * (1 - lin(t, dur - 2.5, dur))
     for a_, b_, s_ in subs:
         if a_ <= t < b_:
-            put(C, sub_spr(s_), 960, 1000, 1.0, 1.0, (0.5, 1.0))
+            put(C, sub_dark(s_), 960, 1010, 1.0, 1.0, (0.5, 1.0))
             break
     return C
 
