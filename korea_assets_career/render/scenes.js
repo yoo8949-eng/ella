@@ -80,8 +80,7 @@ SC[1] = (t, s, e) => {
   const aq = 1 - E.out(P(t, k('어디서'), .4));
   if (aq > 0) { ctx.save(); ctx.globalAlpha *= aq; quoteBox('"그래서 나는 뭘 해야 하나?"', 680, 50, t, k('그래서'), C.amber); ctx.restore(); }
   const tq = k('어디서');
-  if (t > tq) { cue('pop', tq); const kk = pop(t, tq, .5); withT(W / 2, 680, kk, 0, 1, () => { panel(-560, -60, 1120, 120, { r: 24, stroke: C.amber, lw: 3 }); text('어디서, 몇 살쯤 보고 계신가요?  댓글로 남겨 주세요', 0, 2, 40, { w: 800, color: C.amber }); }); }
-  ['20대', '30대', '40대', '50대', '60대+'].forEach((s2, i) => popChip(s2, 560 + i * 200, 820, 34, t, k('연령대') + i * .12, DARKCHIP(C.white)));
+  if (t > tq) { cue('pop', tq); const kk = pop(t, tq, .5); withT(W / 2, 680, kk, 0, 1, () => { panel(-560, -60, 1120, 120, { r: 24, stroke: C.amber, lw: 3 }); text('지금 어디서 보고 계신가요?  댓글로 남겨 주세요', 0, 2, 40, { w: 800, color: C.amber }); }); }
 };
 SC[2] = (t, s, e) => {
   const k = k_(2);
