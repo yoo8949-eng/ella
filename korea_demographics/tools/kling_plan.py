@@ -12,4 +12,12 @@ CLIPS = [
  ('v18_older-worker', 18, "A grey-haired Korean man in a workshop teaching a younger worker, hands on a machine, warm light, seen from the side at a distance, realistic documentary footage, no text"),
  ('v20_robot-factory', 20, "Robotic arms assembling cars on a bright modern Korean factory line, no people, smooth camera dolly, realistic, no text"),
  ('v21_bridge', 21, "Cinematic shot of a long suspension bridge being crossed at sunrise, fog over the water below, camera moving forward along the bridge, no people, no text"),
+ ('v03_nursery', 3, "A hospital newborn nursery in Korea with rows of empty white bassinets, only one occupied crib far away, soft clinical light, slow camera pan, realistic documentary footage, no text"),
+ ('v06_subway-commute', 6, "Korean office workers in coats walking through a busy Seoul subway station at rush hour, motion blur, seen from behind and above, realistic documentary footage, no text"),
+ ('v10_empty-mall', 10, "A nearly empty shopping street in a Korean city in the evening, many shops with 'for lease' signs and dark windows, a few pedestrians far away, slow dolly forward, realistic, no readable text"),
+ ('v12_elderly-queue', 12, "A long line of elderly Korean people waiting quietly in a public office hallway, seen from a distance at a low angle, fluorescent light, realistic documentary footage, no readable text"),
+ ('v14_small-classroom', 14, "A large Korean elementary school classroom with only six young pupils at desks and many empty desks, children seen from behind, sunlight, slow camera move, realistic, no text"),
+ ('v15_tokyo-street', 15, "A quiet residential street in a Japanese town with elderly people walking slowly, closed shutters, late afternoon light, slow tracking shot, realistic documentary footage, no readable text"),
+ ('v19_airport-arrivals', 19, "International arrivals hall at Incheon airport, travelers and foreign workers of many nationalities pulling suitcases toward the camera, seen at a distance, bright light, realistic, no readable text"),
+ ('v22_seoul-sunrise', 22, "Sunrise over the Seoul skyline and the Han River, golden light, slow aerial drone shot moving forward, realistic, no text"),
 ]

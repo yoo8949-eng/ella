@@ -61,10 +61,7 @@ function subscribeRow(x, y, t, t0, opt = {}) {
     });
   });
 }
-function clipBG(name, t, t0, alpha = 1, dark = .35) {
-  // archival/AI video clip behind the graphics (drawn by the host page if the clip is loaded)
-  if (typeof drawClip === 'function') drawClip(name, t, t0, alpha, dark);
-}
+function clipBG() { /* clips are drawn as full-scene backgrounds in main_ko.js (CLIPMAP) */ }
 function quoteBox(str, y, size, t, t0, color = C.white) {
   const k = E.out(P(t, t0, .5)); if (k <= 0) return;
   const m = measure(str, size, 800);

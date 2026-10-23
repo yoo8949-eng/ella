@@ -4,6 +4,64 @@ const HL = /(\d[\d,.]*%|\d[\d,.]*만 명|\d[\d,.]*만|\d[\d,.]*년|\d[\d,.]*세|
 function sceneIndex(t) { let pi = 0; for (let i = 0; i < DATA.ptimes.length; i++) if (t >= DATA.ptimes[i][0] - 0.02) pi = i; return pi; }
 function sceneStart(i) { return i === 0 ? 0 : DATA.ptimes[i][0]; }
 function sceneEnd(i) { return i + 1 < DATA.ptimes.length ? DATA.ptimes[i + 1][0] : TOTAL; }
+
+// ---------- AI video clips as full-screen moving backgrounds ----------
+// frames pre-extracted to clips/<name>/0001.jpg … (24 fps); CLIPINFO = {name: nframes} from clips/info.js
+const CLIPINFO = window.CLIPINFO || {};
+const CLIPMAP = {
+  0: ['v00_seoul-crowd'], 2: ['v02_elderly-park'], 3: ['v03_nursery'], 4: ['v04_empty-playground'], 5: ['v05_retirement-wave'],
+  6: ['v06_subway-commute'], 7: ['v07_cliff-edge'], 10: ['v10_empty-mall'], 11: ['v11_shipyard'], 12: ['v12_elderly-queue'],
+  13: ['v13_empty-school', ['v13b_shuttered-street', '버스가']], 14: ['v14_small-classroom'], 15: ['v15_tokyo-street'],
+  17: ['v17_young-family'], 18: ['v18_older-worker'], 19: ['v19_airport-arrivals'], 20: ['v20_robot-factory'],
+  21: ['v21_bridge'], 22: ['v22_seoul-sunrise'],
+};
+const CLIP_RATE = 0.6, CLIP_XF = 0.8, CLIP_FPS = 24;
+const FRAMES = new Map();
+function frameImg(name, i) {
+  const key = name + '/' + i; let e = FRAMES.get(key);
+  if (!e) {
+    const img = new Image(); e = { img, ok: false };
+    e.p = new Promise(r => { img.onload = () => { e.ok = true; r(); }; img.onerror = () => r(); });
+    img.src = `clips/${name}/${String(i + 1).padStart(4, '0')}.jpg`;
+    FRAMES.set(key, e);
+    if (FRAMES.size > 160) FRAMES.delete(FRAMES.keys().next().value);
+  }
+  return e;
+}
+// which clips a scene shows at t: [[name, u (clip-local seconds), alpha]]
+function sceneClips(i, t) {
+  const list = CLIPMAP[i]; if (!list) return [];
+  const s = sceneStart(i), out = [];
+  list.forEach(c => {
+    const name = Array.isArray(c) ? c[0] : c; if (!CLIPINFO[name]) return;
+    const t0 = Array.isArray(c) ? KW(i, c[1]) : s;
+    const a = Array.isArray(c) ? E.out(P(t, t0 - .4, .8)) : 1;
+    if (a > 0) out.push([name, Math.max(0, t - (Array.isArray(c) ? t0 - .4 : s)) * CLIP_RATE, a]);
+  });
+  return out;
+}
+// frame layers for a clip at local time u: forward play, crossfade back to the start at each loop, adjacent-frame blending
+function clipLayers(name, u) {
+  const n = CLIPINFO[name], d = (n - 1) / CLIP_FPS, L = d - CLIP_XF;
+  const cyc = Math.floor(u / L), loc = u - cyc * L, out = [];
+  const add = (tm, a) => { const f = tm * CLIP_FPS, i0 = Math.min(n - 1, Math.floor(f)), fr = f - i0; out.push([i0, a]); if (fr > .02 && i0 < n - 1) out.push([i0 + 1, a * fr]); };
+  if (cyc > 0 && loc < CLIP_XF) { add(loc + L, 1); add(loc, loc / CLIP_XF); } else add(loc, 1);
+  return out;
+}
+function scenesAt(t) { const pi = sceneIndex(t); return (pi > 0 && t < sceneStart(pi) + .35) ? [pi - 1, pi] : [pi]; }
+window.preloadFrames = t => Promise.all(scenesAt(t).flatMap(i => sceneClips(i, t).flatMap(([name, u]) => clipLayers(name, u).map(([fi]) => frameImg(name, fi).p))));
+function drawSceneClips(i, t) {
+  const cl = sceneClips(i, t); if (!cl.length) return;
+  const s = sceneStart(i), z = 1 + .06 * clamp((t - s) / Math.max(6, sceneEnd(i) - s));
+  cl.forEach(([name, u, a]) => clipLayers(name, u).forEach(([fi, la]) => {
+    const e = frameImg(name, fi); if (!e.ok) return;
+    ctx.save(); ctx.globalAlpha *= a * la;
+    const w = W * z, h = H * z; ctx.drawImage(e.img, (W - w) / 2, (H - h) / 2, w, h); ctx.restore();
+  }));
+  // darken so charts and text stay readable: lighter for the first second of the scene
+  const dark = lerp(.3, .62, E.io(P(t, s + .9, 1.2)));
+  ctx.save(); ctx.fillStyle = `rgba(6,10,19,${dark})`; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
 function drawSubtitle(t) {
   const sub = DATA.subs.find(s => t >= s.start && t < s.end);
   if (!sub) return;
@@ -30,7 +88,7 @@ function render(t) {
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
   background(t);
   const pi = sceneIndex(t);
-  const draw = (i, alpha) => { if (alpha <= 0) return; ctx.save(); ctx.globalAlpha = alpha; SC[i](t, sceneStart(i), sceneEnd(i)); ctx.restore(); };
+  const draw = (i, alpha) => { if (alpha <= 0) return; ctx.save(); ctx.globalAlpha = alpha; drawSceneClips(i, t); SC[i](t, sceneStart(i), sceneEnd(i)); ctx.restore(); };
   if (pi > 0 && t < sceneStart(pi) + .35) draw(pi - 1, 1 - (t - sceneStart(pi)) / .35);
   draw(pi, 1);
   const dt = t - sceneStart(pi);
