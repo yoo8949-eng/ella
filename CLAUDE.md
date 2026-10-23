@@ -23,3 +23,12 @@ This repo stores the scripts, photos, thumbnails, YouTube text and render tools 
 - Subtitles burned in: white text on a black box, 52 px; also deliver the .srt.
 - Deliverables: `<Name>_English.mp4`, `<Name>_English.srt`, `<Name>_thumbnail.jpg`, `<Name>_YouTube.txt`.
 - `<Name>_YouTube.txt` sections: TITLE, DESCRIPTION (with sources and an AI-image disclosure if paintings are used), [Time Line] (chapter timestamps from the final narration audio), TAGS, PINNED COMMENT.
+
+## Korean channel "지식파노라마" (explainer videos, e.g. `korea_demographics/`)
+- Language: Korean. Voice: ElevenLabs "Anna Kim" (`uyVNoMrnUku1dZyVEXwD`), speed 1.08. Cloned voices (Chris 2 etc.) are NOT usable on this account (pay-as-you-go: `ivc_not_permitted`); don't retry them.
+- The ElevenLabs key may be stored as `ELEVENLABS_API_KEy` (lowercase y): code reads both spellings. Never print key values.
+- Script: ~3,000 chars, hook first, "어디서 시청하고 있는지 댓글에" early, 구독·좋아요 mid-roll, 구독·좋아요·알림 설정 at the end. Narration text only, one paragraph per scene (`script_ko.txt`).
+- Style: dark motion graphics (HTML5 canvas rendered with Playwright Chromium, Pretendard font) with animated charts of the script's numbers, keywords popping in as spoken, chapter cards, procedural SFX (no BGM unless asked). Pipeline: `tools/tts_ko.py` → `tools/builddata.py` → `index_ko.html` + `scenes_ko.js` + `main_ko.js` → `render.mjs check / events / video` (4 parallel chunks) → `mix_ko.py` → mux + two-pass compress.
+- Subtitles: 52 px white on black box, ≤24 chars per line, from ElevenLabs character timestamps; deliver the .srt.
+- Deliverables: `<주제>.mp4`, `<주제>.srt`, `<주제>_thumbnail.jpg` (no person → big headline left, chart/line right, brand top-right), `<주제>_YouTube.txt` with [제목 후보], [설명란] (⏱ 타임라인, 자료 출처, AI 음성 고지), [태그], [고정 댓글].
+- AI video clips (fal.ai Kling, ~$0.07/s) are a paid step: show cost and get approval first.
