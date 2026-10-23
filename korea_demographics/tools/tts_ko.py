@@ -5,7 +5,7 @@ usage: tts_ko.py SCRIPT OUTDIR
 import base64, json, os, re, sys, time, urllib.request, urllib.error
 
 VOICE = os.environ.get('KR_VOICE_ID', 'uyVNoMrnUku1dZyVEXwD')  # "Anna Kim" (professional, ko)
-MODEL = 'eleven_multilingual_v2'
+MODEL = os.environ.get('KR_MODEL', 'eleven_multilingual_v2')  # e.g. eleven_v4 (more natural, spoken delivery)
 SETTINGS = {'stability': 0.45, 'similarity_boost': 0.75, 'style': 0.2, 'use_speaker_boost': True, 'speed': 1.08}
 SETTINGS.update(json.loads(os.environ.get('KR_SETTINGS', '{}')))  # per-video overrides, e.g. for a cloned voice
 SAY_AS = [('30~40대', '삼사십 대'), ('~', '에서 '), ('%', '퍼센트'), ('AI', '에이아이'), ('0.72', '영점 칠이'), ('0.7명대', '영점 칠명대'),
