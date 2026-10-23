@@ -7,7 +7,11 @@ import base64, json, os, re, sys, time, urllib.request, urllib.error
 VOICE = os.environ.get('KR_VOICE_ID', 'uyVNoMrnUku1dZyVEXwD')  # "Anna Kim" (professional, ko)
 MODEL = os.environ.get('KR_MODEL', 'eleven_multilingual_v2')  # e.g. eleven_v4 (more natural, spoken delivery)
 SETTINGS = {'stability': 0.45, 'similarity_boost': 0.75, 'style': 0.2, 'use_speaker_boost': True, 'speed': 1.08}
-SETTINGS.update(json.loads(os.environ.get('KR_SETTINGS', '{}')))  # per-video overrides, e.g. for a cloned voice
+_ov = json.loads(os.environ.get('KR_SETTINGS', '{}'))  # per-video overrides; {"_replace": true, ...} replaces all settings
+if _ov.pop('_replace', False):
+    SETTINGS = _ov
+else:
+    SETTINGS.update(_ov)
 SAY_AS = [('30~40대', '삼사십 대'), ('~', '에서 '), ('%', '퍼센트'), ('AI', '에이아이'), ('0.72', '영점 칠이'), ('0.7명대', '영점 칠명대'),
           ('0.8', '영점 팔'), ('2.1명', '이점 일명'), ('1.3에서 1.4', '일점 삼에서 일점 사'), ('0%대', '영 퍼센트대')]
 
@@ -52,6 +56,8 @@ def main(script, out):
         body = {'text': spoken(p), 'model_id': MODEL, 'voice_settings': SETTINGS,
                 'previous_text': spoken(paras[i - 1]) if i else None,
                 'next_text': spoken(paras[i + 1]) if i + 1 < len(paras) else None}
+        if os.environ.get('KR_NO_CONTEXT'):
+            body.pop('previous_text'); body.pop('next_text')
         for attempt in range(4):
             try:
                 r = api(f'/v1/text-to-speech/{VOICE}/with-timestamps?output_format=mp3_44100_128', body)
