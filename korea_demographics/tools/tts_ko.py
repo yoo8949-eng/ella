@@ -7,6 +7,7 @@ import base64, json, os, re, sys, time, urllib.request, urllib.error
 VOICE = os.environ.get('KR_VOICE_ID', 'uyVNoMrnUku1dZyVEXwD')  # "Anna Kim" (professional, ko)
 MODEL = 'eleven_multilingual_v2'
 SETTINGS = {'stability': 0.45, 'similarity_boost': 0.75, 'style': 0.2, 'use_speaker_boost': True, 'speed': 1.08}
+SETTINGS.update(json.loads(os.environ.get('KR_SETTINGS', '{}')))  # per-video overrides, e.g. for a cloned voice
 SAY_AS = [('30~40대', '삼사십 대'), ('~', '에서 '), ('%', '퍼센트'), ('AI', '에이아이'), ('0.72', '영점 칠이'), ('0.7명대', '영점 칠명대'),
           ('0.8', '영점 팔'), ('2.1명', '이점 일명'), ('1.3에서 1.4', '일점 삼에서 일점 사'), ('0%대', '영 퍼센트대')]
 
@@ -34,6 +35,9 @@ def api(path, body=None):
 
 def main(script, out):
     os.makedirs(out, exist_ok=True)
+    extra = os.path.join(os.path.dirname(os.path.abspath(script)), 'say_as.json')  # script-specific readings, applied first
+    if os.path.exists(extra):
+        SAY_AS[:0] = [tuple(x) for x in json.load(open(extra, encoding='utf-8'))]
     paras = paragraphs(script)
     print('paragraphs', len(paras), 'chars', sum(len(p) for p in paras), flush=True)
     sub = api('/v1/user/subscription')

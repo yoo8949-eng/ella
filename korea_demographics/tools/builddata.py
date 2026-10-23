@@ -7,7 +7,7 @@ import numpy as np
 
 SR = 44100
 GAP, GAP_CHAPTER, LEAD, TAIL = 0.55, 0.9, 0.6, 2.5
-CHAPTER_STARTS = {2, 4, 6, 8, 9, 14, 16, 21, 22}  # paragraphs that open a new section get a longer pause before them
+CHAPTER_STARTS = set(map(int, os.environ.get('CHAPTER_STARTS', '2,4,6,8,9,14,16,21,22').split(',')))  # paragraphs that open a new section get a longer pause before them
 MAX_SUB = 24
 
 

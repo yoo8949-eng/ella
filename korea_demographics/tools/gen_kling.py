@@ -3,7 +3,12 @@ usage: gen_kling.py OUTDIR [ids...]"""
 import json, os, sys, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from kling_plan import CLIPS
+import importlib.util
+_plan = os.environ.get('KLING_PLAN')
+if _plan:
+    _spec = importlib.util.spec_from_file_location('plan', _plan); _m = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_m); CLIPS = _m.CLIPS
+else:
+    from kling_plan import CLIPS
 OUT = sys.argv[1]; IDS = set(sys.argv[2:])
 EP = 'https://queue.fal.run/fal-ai/kling-video/v2.5-turbo/pro/text-to-video'
 HDR = {'Authorization': 'Key ' + os.environ['FAL_KEY'].strip(), 'Content-Type': 'application/json'}
