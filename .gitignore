@@ -1,3 +1,4 @@
 output/
 __pycache__/
 korea_demographics/tools/clips/
+korea_demographics/*.mp4
