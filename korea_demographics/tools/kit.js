@@ -99,7 +99,7 @@ function iconCard(x, y, w, h, iconFn, label, t, t0, opt = {}) {
   withT(x, y, k, 0, alpha, () => {
     panel(-w / 2, -h / 2, w, h, { stroke });
     withT(0, iconY, iconS, 0, 1, iconFn);
-    text(label, 0, h / 2 - (sub ? 70 : 42), 34, { w: 800, color });
+    text(label, 0, h / 2 - (sub ? 70 : 42), 38, { w: 800, color });
     if (sub) text(sub, 0, h / 2 - 32, 22, { w: 500, color: C.muted });
   });
 }

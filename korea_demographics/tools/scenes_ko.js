@@ -6,6 +6,10 @@ const _cued = new Set();
 function cue(type, t0) { const key = type + '@' + t0.toFixed(2); if (!_cued.has(key)) { _cued.add(key); EVENTS.push([type, +t0.toFixed(2)]); } }
 function at(pi, kw, n = 0) { try { return KW(pi, kw, n); } catch (e) { throw e; } }
 
+// ---------- bigger on-screen text (user asked for larger text) ----------
+const TS = 1.15;
+{ const _t = title; title = (str, y, size, t, t0, opt) => _t(str, y, size * TS, t, t0, opt); }
+{ const _c = chip; chip = (str, x, y, size, opt) => _c(str, x, y, size * 1.12, opt); }
 // ---------- extra helpers ----------
 function bigNum(str, x, y, size, t, t0, color = C.white, d = .5) {
   const k = pop(t, t0, d); if (k <= 0) return;
@@ -14,20 +18,20 @@ function bigNum(str, x, y, size, t, t0, color = C.white, d = .5) {
 }
 function label(str, x, y, size, t, t0, opt = {}) {
   const k = E.out(P(t, t0, .4)); if (k <= 0) return;
-  text(str, x, y + (1 - k) * 18, size, { w: opt.w || 600, color: opt.color || C.muted, align: opt.align || 'center', alpha: k });
+  text(str, x, y + (1 - k) * 18, size * TS, { w: opt.w || 600, color: opt.color || C.muted, align: opt.align || 'center', alpha: k });
 }
 function fmt(n) { return n.toLocaleString('en-US'); }
 // bar chart with per-bar reveal times. items: [{label, val, color, t0, text}]
 function barChart(items, x0, base, w, h, vmax, t, opt = {}) {
-  const { gap = 40, alpha = 1, lsize = 28, vsize = 34 } = opt;
+  const { gap = 40, alpha = 1, lsize = 28, vsize = 34 } = opt; const LS = lsize * 1.2, VS = vsize * 1.2;
   const bw = (w - gap * (items.length - 1)) / items.length;
   line(x0 - 20, base, x0 + w + 20, base, C.dim, 3, alpha);
   items.forEach((it, i) => {
     const k = E.out(P(t, it.t0, .7)); if (k <= 0) return;
     if (k < .05) cue('pop', it.t0);
     const x = x0 + bw / 2 + i * (bw + gap), hh = h * it.val / vmax * k;
-    bar(x, base, bw, hh, it.color || C.cyan, it.label, null, alpha, lsize);
-    text(it.text || fmt(it.val), x, base - hh - 30, vsize, { w: 900, color: it.color || C.cyan, alpha: alpha * k });
+    bar(x, base, bw, hh, it.color || C.cyan, it.label, null, alpha, LS);
+    text(it.text || fmt(it.val), x, base - hh - 34, VS, { w: 900, color: it.color || C.cyan, alpha: alpha * k });
   });
 }
 // cliff: a line that stays flat then drops; k = progress
@@ -64,7 +68,7 @@ function subscribeRow(x, y, t, t0, opt = {}) {
 function clipBG() { /* clips are drawn as full-scene backgrounds in main_ko.js (CLIPMAP) */ }
 function quoteBox(str, y, size, t, t0, color = C.white) {
   const k = E.out(P(t, t0, .5)); if (k <= 0) return;
-  const m = measure(str, size, 800);
+  size *= 1.12; const m = measure(str, size, 800);
   panel(W / 2 - m / 2 - 50, y - size * .9, m + 100, size * 1.8, { r: 20, fill: 'rgba(12,18,32,.9)', stroke: C.amber, lw: 3, alpha: k });
   text(str, W / 2, y, size, { w: 800, color, alpha: k });
 }

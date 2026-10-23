@@ -66,17 +66,17 @@ function drawSubtitle(t) {
   const sub = DATA.subs.find(s => t >= s.start && t < s.end);
   if (!sub) return;
   const a = Math.min(clamp((t - sub.start) / .12), clamp((sub.end - t) / .1));
-  const size = 52;
+  const size = 62;
   const parts = sub.text.split(HL).filter(x => x !== '');
   const tw = parts.reduce((w, p) => w + measure(p, size, 700), 0);
-  const y = 985;
-  panel(W / 2 - tw / 2 - 36, y - 48, tw + 72, 96, { r: 8, fill: 'rgba(0,0,0,.82)', stroke: null, alpha: a });
+  const y = 978;
+  panel(W / 2 - tw / 2 - 40, y - 56, tw + 80, 112, { r: 8, fill: 'rgba(0,0,0,.82)', stroke: null, alpha: a });
   let x = W / 2 - tw / 2;
   parts.forEach(p => { const hl = HL.test(p); HL.lastIndex = 0; const w = text(p, x, y + 2, size, { w: 700, align: 'left', color: hl ? '#ffd166' : C.white, alpha: a }); x += w; });
 }
 function drawChrome(t, pi) {
   circle(78, 62, 9, C.red, .6 + .4 * Math.sin(t * 4));
-  text('지식파노라마', 100, 64, 28, { w: 800, align: 'left', color: C.white, alpha: .9 });
+  text('지식파노라마', 100, 64, 32, { w: 800, align: 'left', color: C.white, alpha: .9 });
   let ch = CHAP[0][1]; for (const c of CHAP) if (pi >= c[0]) ch = c[1];
   const m = measure(ch, 24, 700);
   panel(W - 60 - m - 40, 40, m + 40, 46, { r: 23, fill: 'rgba(16,24,42,.8)', stroke: C.line });
