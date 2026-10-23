@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Pretendard;font-weight:400;src:url(Pretendard-Regular.otf)}
+@font-face{font-family:Pretendard;font-weight:500;src:url(Pretendard-Medium.otf)}
+@font-face{font-family:Pretendard;font-weight:600;src:url(Pretendard-SemiBold.otf)}
+@font-face{font-family:Pretendard;font-weight:700;src:url(Pretendard-Bold.otf)}
+@font-face{font-family:Pretendard;font-weight:800;src:url(Pretendard-ExtraBold.otf)}
+@font-face{font-family:Pretendard;font-weight:900;src:url(Pretendard-Black.otf)}
+html,body{margin:0;background:#000}</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="data.js"></script><script src="lib.js"></script><script src="kit.js"></script><script src="scenes_ko.js"></script><script src="main_ko.js"></script>
+<script>
+// ---- video clips: <video> elements seeked per frame by the host before render(t) ----
+const CLIPS = {}; const CLIP_LIST = (window.CLIP_FILES || []);
+let pendingSeeks = [];
+function loadClip(name) {
+  return new Promise(res => {
+    const v = document.createElement('video'); v.src = 'clips/' + name + '.mp4'; v.muted = true; v.preload = 'auto';
+    v.addEventListener('loadedmetadata', () => { CLIPS[name] = { v, dur: v.duration, want: -1 }; res(); });
+    v.addEventListener('error', () => res());
+  });
+}
+function clipTime(name, t, t0) { const c = CLIPS[name]; if (!c) return null; const u = Math.max(0, t - t0); const d = c.dur - 0.05; const k = Math.floor(u / d), r = u - k * d; return k % 2 === 0 ? r : d - r; }  // ping-pong
+window.drawClip = (name, t, t0, alpha, dark) => {
+  const c = CLIPS[name]; if (!c || alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha *= alpha;
+  const vw = c.v.videoWidth, vh = c.v.videoHeight; const s = Math.max(W / vw, H / vh) * (1 + 0.04 * Math.min(1, (t - t0) / 6));
+  const dw = vw * s, dh = vh * s;
+  ctx.drawImage(c.v, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  ctx.fillStyle = `rgba(6,10,19,${dark})`; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+};
+async function seekClips(t) {
+  // seek every clip that a scene may draw at t (cheap: clips are short; seek all loaded clips whose window covers t)
+  const jobs = [];
+  for (const name in CLIPS) {
+    const c = CLIPS[name]; const t0 = (window.CLIP_T0 || {})[name]; if (t0 === undefined || t < t0 - 0.1 || t > t0 + 40) continue;
+    const ct = clipTime(name, t, t0); if (ct === null || Math.abs(c.v.currentTime - ct) < 0.001) continue;
+    jobs.push(new Promise(res => { const h = () => { c.v.removeEventListener('seeked', h); res(); }; c.v.addEventListener('seeked', h); c.v.currentTime = ct; }));
+  }
+  await Promise.all(jobs);
+}
+(async()=>{
+  await Promise.all([400,500,600,700,800,900].map(w=>document.fonts.load(`${w} 40px Pretendard`,'가A')));
+  setCtx(document.getElementById('c').getContext('2d')); initMap();
+  await Promise.all(CLIP_LIST.map(loadClip));
+  window.frameJpeg = async (t, q) => { await seekClips(t); render(t); return document.getElementById('c').toDataURL('image/jpeg', q || 0.92); };
+  window.ready = true;
+})();
+</script></body></html>

@@ -100,11 +100,11 @@ function pop(t, t0, d = 0.5) { return E.back(P(t, t0, d)); }
 
 // chip label: rounded pill with text
 function chip(str, x, y, size, opt = {}) {
-  const { color = C.white, bg = C.red, alpha = 1, w = 800, pad = 0.55 } = opt;
+  const { color = C.white, bg = C.red, alpha = 1, w = 800, pad = 0.55, stroke = null } = opt;
   if (alpha <= 0) return;
   const m = measure(str, size, w);
   const pw = m + size * pad * 2, ph = size * 1.6;
-  panel(x - pw / 2, y - ph / 2, pw, ph, { r: ph / 2, fill: bg, stroke: null, alpha });
+  panel(x - pw / 2, y - ph / 2, pw, ph, { r: ph / 2, fill: bg, stroke, lw: 3, alpha });
   text(str, x, y + size * 0.04, size, { w, color, alpha });
 }
 // big stamp (rotated rectangle text)
